@@ -6,42 +6,44 @@
 import psycopg2
 
 
-def connect():
+def connect(database_name = "tournament"):
     """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+    try:
+        database = psycopg2.connect("dbname={}".format(database_name))
+        cursor = database.cursor()
+        return database, cursor
+    except:
+        print("Connection error occured.")
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
     # delete from matches/standings
-    connection = connect()
-    cursor = connection.cursor()
+    dbconnection, cursor = connect()
     cursor.execute("DELETE FROM MATCH")
-    connection.commit()
-    connection.close()
+    dbconnection.commit()
+    dbconnection.close()
     
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
     # delete from player
-    connection = connect()
-    cursor = connection.cursor()
+    dbconnection, cursor = connect()
     cursor.execute("DELETE FROM PLAYER")
-    connection.commit()
-    connection.close()
+    dbconnection.commit()
+    dbconnection.close()
 
 
 def countPlayers():
     """Returns the number of players currently registered."""
     # select count from player
-    connection = connect()
-    cursor = connection.cursor()
+    dbconnection, cursor = connect()
     cursor.execute("SELECT COUNT(*) FROM PLAYER")
 
     player_count = cursor.fetchone()[0]
     
-    connection.close()
+    dbconnection.close()
 
     return player_count
 
@@ -56,12 +58,11 @@ def registerPlayer(name):
     """
 
     # insert into players
-    connection = connect()
-    cursor = connection.cursor()
+    dbconnection, cursor = connect()
     cursor.execute("INSERT INTO PLAYER(NAME) VALUES(%s)", (name,))
-    connection.commit()
+    dbconnection.commit()
     
-    connection.close()
+    dbconnection.close()
     
 
 
@@ -80,8 +81,7 @@ def playerStandings():
     """
 
     # select from standing
-    connection = connect()
-    cursor = connection.cursor()
+    dbconnection, cursor = connect()
     cursor.execute("SELECT Player.id, Player.name, "
                    "COALESCE(sv.wins, 0) AS wins, "
                    "COALESCE(sv.losses, 0) + COALESCE(sv.wins, 0) AS matches "
@@ -93,7 +93,7 @@ def playerStandings():
 
     player_list = cursor.fetchall()
     
-    connection.close()
+    dbconnection.close()
 
     return player_list
     
@@ -107,12 +107,11 @@ def reportMatch(winner, loser):
       loser:  the id number of the player who lost
     """
     # Insert into standings table
-    connection = connect()
-    cursor = connection.cursor()
+    dbconnection, cursor = connect()
     cursor.execute("INSERT INTO Match(winner, loser) VALUES(%s, %s)", (winner, loser))
-    connection.commit()
+    dbconnection.commit()
 
-    connection.close()
+    dbconnection.close()
  
  
 def swissPairings():
@@ -133,8 +132,7 @@ def swissPairings():
     # select from  standings
     # return players who have equal
     # or nearly equal wins
-    connection = connect()
-    cursor = connection.cursor()
+    dbconnection, cursor = connect()
     cursor.execute("SELECT COUNT(*) FROM Match")
     matches = cursor.fetchone()
 
@@ -146,7 +144,7 @@ def swissPairings():
         cursor.execute("SELECT row_number() OVER(ORDER BY random()) AS row_order, * "
                        "FROM Player")
         random_ordered_players = cursor.fetchall()
-        connection.close()
+        dbconnection.close()
 
         for(row_number, player_id, player_name) in random_ordered_players:
             if row_number % 2 != 0:
