@@ -15,7 +15,6 @@ def connect(database_name = "tournament"):
     except:
         print("Connection error occured.")
 
-
 def deleteMatches():
     """Remove all the match records from the database."""
     # delete from matches/standings
@@ -23,8 +22,6 @@ def deleteMatches():
     cursor.execute("DELETE FROM MATCH")
     dbconnection.commit()
     dbconnection.close()
-    
-
 
 def deletePlayers():
     """Remove all the player records from the database."""
@@ -33,7 +30,6 @@ def deletePlayers():
     cursor.execute("DELETE FROM PLAYER")
     dbconnection.commit()
     dbconnection.close()
-
 
 def countPlayers():
     """Returns the number of players currently registered."""
@@ -63,8 +59,6 @@ def registerPlayer(name):
     dbconnection.commit()
     
     dbconnection.close()
-    
-
 
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
@@ -96,8 +90,6 @@ def playerStandings():
     dbconnection.close()
 
     return player_list
-    
-
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
@@ -112,8 +104,7 @@ def reportMatch(winner, loser):
     dbconnection.commit()
 
     dbconnection.close()
- 
- 
+
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
   
